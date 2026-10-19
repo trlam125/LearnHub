@@ -1,5 +1,11 @@
 name: Java CI
+
 on: [push, pull_request]
+
+concurrency:
+  group: learnhub-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -34,8 +40,51 @@ jobs:
           echo 'TEST_FLYWAY_LOCATIONS=classpath:db/mysql' >> "$GITHUB_ENV"
       - run: mvn -B verify
       - run: node src/test/js/speech.test.cjs && node src/test/js/quiz-timer.test.cjs && node src/test/js/quiz-autosave.test.cjs
+      - name: Prepare Wispbyte JAR
+        if: matrix.database == 'h2' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          JAR=$(find target -maxdepth 1 -type f -name "*.jar" ! -name "*.jar.original" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -print -quit)
+          test -n "$JAR"
+          cp "$JAR" main.jar
+      - name: Upload Wispbyte JAR
+        if: matrix.database == 'h2' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wispbyte-main
+          path: main.jar
+          if-no-files-found: error
+          retention-days: 7
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-report-${{ matrix.database }}
           path: target/surefire-reports/
+          if-no-files-found: ignore
+
+  release:
+    name: Publish Wispbyte Release
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: wispbyte-main
+          path: .
+      - name: Create SHA-256 checksum
+        run: sha256sum main.jar > main.jar.sha256
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: deploy-${{ github.run_number }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          gh release create "$RELEASE_TAG" main.jar main.jar.sha256 \
+            --target "$RELEASE_SHA" \
+            --title "LearnHub $RELEASE_TAG" \
+            --notes "Automated deployment from commit $RELEASE_SHA" \
+            --latest
