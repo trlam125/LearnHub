@@ -41,9 +41,13 @@ public class QuizService {
     @Transactional(noRollbackFor = AttemptLimitReachedException.class)
     public Attempt start(Account user, Long quizId) {
         users.lockById(user.id).orElseThrow();
-        // Serialize starting an attempt with moving its quiz to another lesson.
-        Quiz quiz = db.lock(Quiz.class, quizId);
-        db.entityManager().refresh(quiz, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        // Lock the quiz row before loading its eager lesson association.
+        // This avoids an inconsistent entity read when another transaction moves the quiz.
+        if (db.entityManager().createNativeQuery("select id from quiz where id=:id for update")
+                .setParameter("id", quizId).getResultList().isEmpty())
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND);
+        Quiz quiz = db.get(Quiz.class, quizId);
+        db.entityManager().refresh(quiz);
         access.requireLesson(user, quiz.lesson);
         if (!quiz.published) throw new AccessDeniedException("Bài kiểm tra chưa xuất bản.");
         String key = user.id + ":" + quiz.id;
