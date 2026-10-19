@@ -255,6 +255,9 @@ public class AdminService {
                 db.entityManager().refresh(affected, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
                 affected.published = false;
             }
+            // Ensure refresh() in QuizService.start reads the unpublished state
+            // even when both service calls share one transaction (for example, in tests).
+            db.entityManager().flush();
         }
         audit.record(actor, "content_saved", key + ":" + entity.id, "Đã cập nhật nội dung.");
         return entity.id;
