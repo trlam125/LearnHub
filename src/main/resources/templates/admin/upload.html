@@ -1,0 +1,41 @@
+<!doctype html><html lang="vi" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments/layout :: head('Video và tài liệu')}"></head><body class="chinese-app"><a class="skip-link" href="#main">Đến nội dung chính</a><div class="nav-shade" id="nav-shade"></div><aside th:replace="~{fragments/layout :: sidebar}"></aside><div class="workspace"><header th:replace="~{fragments/layout :: topbar}"></header><div th:if="${notice}" class="messages" role="status"><div class="message success" th:text="${notice}"></div></div><main id="main"><div class="portal-page material-page">
+<a class="back" href="/admin">← Quản lý</a>
+<div class="page-heading"><h1>Video &amp; tài liệu bài học</h1><p>Thêm nội dung để học viên xem cùng bài giảng.</p></div>
+<div class="material-forms">
+<section class="panel" th:if="${editing==null or editing.external}">
+<h2 th:text="${editing==null?'Thêm bằng liên kết':'Sửa liên kết'}"></h2>
+<p>Dùng cho mọi video và tài liệu đã lưu trên Google Drive, OneDrive hoặc nơi chia sẻ khác.</p>
+<form class="admin-form" method="post" th:action="@{/admin/materials/link}">
+<input th:if="${editing!=null}" type="hidden" name="entityId" th:value="${editing.id}">
+<p><label>Bài học<select name="lessonId" required><option value="">Chọn bài học</option><option th:each="l:${lessons}" th:value="${l.id}" th:selected="${editing!=null and editing.lesson.id==l.id}" th:text="${l.chapter.course.title}+' · '+${l.title}"></option></select></label></p>
+<p><label>Loại nội dung<select name="materialType" required><option value="video" th:selected="${editing==null or editing.video}">Video bài giảng</option><option value="document" th:selected="${editing!=null and !editing.video}">Tài liệu học tập</option></select></label></p>
+<p><label>Tên hiển thị<input name="title" required maxlength="180" th:value="${editing!=null?editing.title:''}" placeholder="Ví dụ: Bài 1 · Chào hỏi"></label></p>
+<p><label>Liên kết chia sẻ<input type="url" name="externalUrl" required maxlength="2048" placeholder="https://..." th:value="${editing!=null?editing.externalUrl:''}"></label></p>
+<details><summary>Cho phép xem video ngay trong bài học</summary><p>Google Drive thường chỉ cần liên kết chia sẻ. Với OneDrive, sao chép địa chỉ xem từ mục “Nhúng” của video. Nếu không có, học viên vẫn có thể mở video bằng nút xem riêng.</p><label>Liên kết xem trong bài (không bắt buộc)<input type="url" name="embedUrl" maxlength="2048" placeholder="https://..." th:value="${editing!=null?editing.embedUrl:''}"></label></details>
+<p><label class="check-label"><input type="checkbox" name="reviewed" value="true" th:checked="${editing!=null and editing.reviewed}">Cho học viên xem — tôi đã kiểm tra nội dung và quyền chia sẻ.</label></p>
+<button class="button">Lưu nội dung</button> <a th:if="${editing!=null}" href="/admin/upload">Hủy chỉnh sửa</a>
+</form><p class="footnote">Hãy mở thử liên kết bằng tài khoản học viên trước khi công bố.</p>
+</section>
+<section class="panel" th:if="${editing==null}"><h2>Tải tài liệu lên</h2><p>Dành cho tài liệu dưới 1 MB. File lớn hơn hãy thêm bằng liên kết bên cạnh.</p>
+<form id="material-upload" class="admin-form" method="post" enctype="multipart/form-data" th:action="@{/admin/upload}">
+<p><label>Bài học<select name="lessonId" required><option value="">Chọn bài học</option><option th:each="l:${lessons}" th:value="${l.id}" th:text="${l.chapter.course.title}+' · '+${l.title}"></option></select></label></p>
+<p><label>Tên tài liệu<input name="title" required maxlength="180"></label></p>
+<p><label>Chọn tài liệu dưới 1 MB<input id="material-file" type="file" name="file" accept=".pdf,.docx,.xlsx,.pptx,.txt" required></label><small>PDF, Word, Excel, PowerPoint hoặc văn bản.</small></p>
+<p id="material-file-status" role="status" aria-live="polite"></p>
+<p><label class="check-label"><input type="checkbox" name="reviewed" value="true">Cho học viên xem — tôi đã kiểm tra nội dung và quyền sử dụng.</label></p>
+<p><label class="check-label"><input type="checkbox" name="allowDownload" value="true">Cho phép tải xuống tài liệu.</label></p>
+<button class="button">Tải tài liệu lên</button>
+</form></section>
+<section class="panel" th:if="${editing!=null and !editing.external}"><h2>Sửa tài liệu đã tải</h2>
+<p th:text="${editing.lesson.title}"></p>
+<form class="admin-form" method="post" th:action="@{/admin/materials/{id}/details(id=${editing.id})}">
+<p><label>Tên tài liệu<input name="title" required maxlength="180" th:value="${editing.title}"></label></p>
+<p><label class="check-label"><input type="checkbox" name="reviewed" value="true" th:checked="${editing.reviewed}">Cho học viên xem</label></p>
+<p><label class="check-label"><input type="checkbox" name="allowDownload" value="true" th:checked="${editing.allowDownload}">Cho phép tải xuống tài liệu</label></p>
+<button class="button">Lưu thay đổi</button> <a href="/admin/upload">Hủy chỉnh sửa</a>
+</form></section>
+</div>
+<p class="footnote">Tài liệu Word, Excel, PowerPoint và TXT cần bật “Cho phép tải xuống” để học viên mở được. PDF có thể xem trực tiếp khi tắt tải xuống.</p><h2>Nội dung đã thêm</h2><p>Hiển thị tối đa 200 mục gần nhất. Chọn “Chỉnh sửa” để cập nhật hoặc tạm ẩn.</p>
+<div class="table-wrap"><table><thead><tr><th>Tên</th><th>Bài học</th><th>Loại</th><th>Trạng thái</th><th></th></tr></thead>
+<tbody><tr th:each="r:${materials}"><td th:text="${r.title}"></td><td th:text="${r.lesson.title}"></td><td th:text="${r.video?'Video':'Tài liệu'}"></td><td th:text="${r.reviewed?'Đang hiển thị':'Đang ẩn'}"></td><td><a th:href="@{/admin/materials/{id}(id=${r.id})}">Chỉnh sửa</a></td></tr><tr th:if="${#lists.isEmpty(materials)}"><td colspan="5">Chưa có video hoặc tài liệu. Hãy thêm nội dung đầu tiên ở trên.</td></tr></tbody></table></div>
+</div></main><footer th:replace="~{fragments/layout :: footer}"></footer></div><script src="/portal.js" defer></script><script src="/materials.js" defer></script></body></html>

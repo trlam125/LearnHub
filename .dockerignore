@@ -1,0 +1,9 @@
+.env
+.git
+.tools
+target
+data
+private-media
+backups
+.idea
+*.iml

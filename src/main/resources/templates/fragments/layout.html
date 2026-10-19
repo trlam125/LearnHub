@@ -1,0 +1,50 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="csrf-header" th:content="${_csrf.headerName}"><meta name="csrf-token" th:content="${_csrf.token}">
+    <title th:text="${title}+' · LearnHub Languages'"></title>
+    <link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/chinese.css"><link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+<aside class="app-sidebar" id="app-sidebar" th:fragment="sidebar" aria-label="Điều hướng">
+    <a class="portal-brand" href="/"><span class="seal" th:text="${languageSymbol}">EN</span><span>LearnHub Languages<small>Tiếng Anh &amp; Tiếng Trung</small></span></a>
+    <div class="nav-caption">BẠN MUỐN HỌC</div>
+    <nav class="language-switch" aria-label="Chọn ngôn ngữ học">
+        <a href="/tieng-anh" th:classappend="${isEnglish}?'selected':''" th:attr="aria-current=${isEnglish?'page':null}"><b>EN</b> Tiếng Anh</a>
+        <a href="/tieng-trung" th:classappend="${!isEnglish}?'selected':''" th:attr="aria-current=${!isEnglish?'page':null}"><b lang="zh">汉</b> Tiếng Trung</a>
+    </nav>
+    <div class="nav-caption" th:text="'ĐANG HỌC · '+${languageName}"></div>
+    <nav>
+        <a class="nav-item" th:classappend="${requestPath=='/'}?'active':''" href="/"><span>⌂</span>Trang chủ</a>
+        <a class="nav-item" th:href="${languagePath}"><span th:text="${languageSymbol}"></span><th:block th:text="${isEnglish?'Lộ trình A1–C2':'Lộ trình HSK'}"></th:block></a>
+        <a th:unless="${isEnglish}" class="nav-item" href="/lo-trinh?lang=zh&amp;category=advanced"><span lang="zh">高</span>HSK 7–9</a>
+        <a class="nav-item" href="/courses"><span>▤</span>Khóa học</a>
+        <a class="nav-item" href="/khoa-hoc"><span>▦</span>Lớp học &amp; tư vấn</a>
+        <a class="nav-item" href="/tro-choi"><span>✧</span>Trò chơi học tập</a>
+        <div class="nav-caption">KHÁM PHÁ</div>
+        <a class="nav-item" href="/giao-vien"><span>♧</span>Giới thiệu giáo viên</a>
+        <a class="nav-item" href="/bang-xep-hang"><span>♜</span>Bảng xếp hạng chung</a>
+        <a class="nav-item" href="/dang-phat-trien"><span>✦</span>Sắp ra mắt</a>
+        <div class="nav-caption">CỦA TÔI</div>
+        <a class="nav-item" href="/my-learning"><span>▱</span>Khóa học của tôi</a>
+        <a class="nav-item" href="/tu-da-luu"><span>♧</span>Từ vựng đã lưu</a>
+        <a class="nav-item" href="/flashcards?mode=due"><span>↻</span>Ôn tập hôm nay</a>
+        <a th:if="${me!=null and me.role.name()!='STUDENT'}" class="nav-item" href="/admin"><span>⚙</span>Quản lý website</a>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="sidebar-note"><span th:text="${isEnglish?'A little every day':'日积月累'}"></span><p>Mỗi ngày một chút,<br>kiến thức sẽ đầy thêm.</p></div>
+        <a th:if="${me!=null}" class="sidebar-user" href="/tai-khoan"><span class="user-avatar" th:text="${@fmt.initial(me.name)}"></span><span><b th:text="${me.name}"></b><small>Cài đặt tài khoản →</small></span></a>
+        <a th:if="${me==null}" class="button full" href="/register">Tạo tài khoản miễn phí</a>
+    </div>
+</aside>
+<header class="portal-topbar" th:fragment="topbar">
+    <div><button class="menu-toggle" id="menu-toggle" aria-controls="app-sidebar" aria-expanded="false" aria-label="Mở menu">☰</button><span class="topbar-label" th:text="'Học mỗi ngày · '+${languageName}"></span></div>
+    <div class="topbar-actions">
+        <th:block th:if="${me!=null}"><span class="top-stat" th:text="'🔥 '+${study.streak}"></span><span class="top-stat" th:text="'✦ '+${study.xp}+' XP'"></span><form method="post" th:action="@{/logout}"><button class="text-button">Đăng xuất</button></form></th:block>
+        <th:block th:if="${me==null}"><a href="/login">Đăng nhập</a><a class="button small" href="/register">Đăng ký ↗</a></th:block>
+    </div>
+</header>
+<footer th:fragment="footer"><a class="brand" href="/">LearnHub Languages</a><p>Tiếng Anh &amp; Tiếng Trung · Học mỗi ngày</p><div><a href="/policies">Điều khoản &amp; dữ liệu</a><a th:href="'mailto:'+${settings.supportEmail}">Hỗ trợ</a></div><small th:text="'© '+${year}+' LearnHub'"></small></footer>
+</body>
+</html>

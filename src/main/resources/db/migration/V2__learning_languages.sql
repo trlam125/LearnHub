@@ -1,0 +1,11 @@
+alter table course add column language varchar(2) default 'zh' not null;
+alter table course add constraint course_language_check check (language in ('zh', 'en'));
+alter table learning_path add column language varchar(2) default 'zh' not null;
+alter table learning_path add constraint path_language_check check (language in ('zh', 'en'));
+alter table teacher add column language varchar(4) default 'zh' not null;
+alter table teacher add constraint teacher_language_check check (language in ('zh', 'en', 'both'));
+alter table planned_product add column language varchar(2) default 'zh' not null;
+alter table planned_product add constraint product_language_check check (language in ('zh', 'en'));
+create index course_language_published_idx on course(language, published, kind);
+create index path_language_published_idx on learning_path(language, published);
+create index teacher_language_published_idx on teacher(language, published);

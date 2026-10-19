@@ -1,0 +1,10 @@
+server:
+  address: 0.0.0.0
+  forward-headers-strategy: native
+  servlet:
+    session:
+      cookie:
+        secure: true
+spring:
+  thymeleaf:
+    cache: true
