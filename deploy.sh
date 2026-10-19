@@ -3,6 +3,15 @@
 # Checks the newest public GitHub Release every 15 minutes by default.
 set -u
 
+# Wispbyte does not load .env files automatically. Export configuration
+# from a trusted, server-local .env before starting the Java process.
+# Values containing shell special characters must be shell-quoted.
+if [ -f ./.env ]; then
+    set -a
+    . ./.env
+    set +a
+fi
+
 RELEASE_BASE="https://github.com/trlam125/LearnHub/releases/latest/download"
 CHECK_INTERVAL="${CHECK_INTERVAL:-900}"
 STARTUP_WAIT="${STARTUP_WAIT:-75}"

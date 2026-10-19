@@ -1,58 +1,42 @@
-# Secrets and local environment
+
+# Environment variables and secrets
 .env
 .env.*
 !.env.example
-!.env.*.example
 *.pem
 *.key
 *.p12
 *.pfx
-*.jks
 *.keystore
 
-# Machine-specific Spring Boot overrides
-src/main/resources/application-local.yml
-src/main/resources/application-local.yaml
-src/main/resources/application-secrets.yml
-src/main/resources/application-secrets.yaml
-
-# Maven / Java build artifacts
+# Maven build
 target/
 .tools/
-*.class
-*.jar
-*.war
-*.ear
-!/.mvn/wrapper/maven-wrapper.jar
+main.jar
 
-# Runtime state, uploaded files and backups
+# Application data
 data/
 private-media/
-uploads/
 backups/
+
+# Logs and temporary files
 logs/
-tmp/
 *.log
-*.log.*
-*.mv.db
-*.h2.db
-*.sqlite
-*.sqlite3
-*.sql.gz
-*.dump
+*.tmp
 *.bak
 
-# IDE / OS
+# IDE
 .idea/
-.vscode/
 *.iml
+.vscode/
+
+# OS
 .DS_Store
 Thumbs.db
-*.swp
-*.swo
 
-# Local Docker Compose overrides
-compose.override.yml
-compose.override.yaml
-docker-compose.override.yml
-docker-compose.override.yaml
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
